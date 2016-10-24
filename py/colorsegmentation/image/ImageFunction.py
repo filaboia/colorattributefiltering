@@ -127,6 +127,9 @@ class HarmoniaCor(ColorStructureFunction):
 
 class EvaluationFunction(ImageFunction):
     def __new__(cls, f, w):
+        if (np.prod(f.shape[-2:]) != np.prod(w.shape[-2:])):
+            raise TypeError("Inputs' last two dimensions must match but was " + str(f.shape) + " and " + str(w.shape) + ".")
+        
         return cls.compute(f, w)
     
     @staticmethod
