@@ -152,14 +152,6 @@ class FilaTree(object):
                     
                     node.att = node.att
                     
-                    # node.att = maxatt
-                    
-                    # if maxatt > node.att:
-                    #     node.att = maxatt
-                    
-                    # if maxatt < node.att:
-                    #     node.att = maxatt
-                    
                     maxchild.mask = None
 
             toprocess = [ft]
@@ -194,11 +186,8 @@ class FilaTree(object):
             mask.merge(node.mask)
             maskdict[node.getKey()] = mask
             if orig is None:
-                # node.att = ImageFunction(mask.toImage())
-                #  node.att = ImageFunction((mask.getX() >= 0)[..., np.newaxis])
                 node.att = ImageFunction(np.vstack(mask()))
             else:
-                # node.att = ImageFunction(np.vstack((orig[..., mask.getX(), mask.getY()], np.vstack((mask.getX(), mask.getY())))))
                 node.att = ImageFunction(orig[..., mask.getX(), mask.getY()])
 
         return ft
@@ -230,7 +219,6 @@ class FilaTree(object):
             else:
                 mask = Points(np.uint16, ws[node.mask()][0] == ws)
             regdict[node.getKey()] = mask
-            # node.att = ImageFunction(np.vstack((orig[..., mask.getX(), mask.getY()], np.vstack((mask.getX(), mask.getY())))))
             node.att = ImageFunction(orig[..., mask.getX(), mask.getY()])
             
         return ft

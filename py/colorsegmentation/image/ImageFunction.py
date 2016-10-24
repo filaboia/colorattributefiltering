@@ -113,8 +113,6 @@ class HarmoniaCor(ColorStructureFunction):
             deltaa = abs(p1[1] - p2[1])
             deltab = abs(p1[2] - p2[2])
             deltaHab = np.nan_to_num(pow(pow(deltaa, 2) + pow(deltab, 2) - pow(deltaCab, 2), 0.5))
-            # deltaEab = pow(pow(deltaL, 2) + pow(deltaa, 2) + pow(deltab, 2), 0.5)
-            # deltaHab = np.nan_to_num(pow(pow(deltaEab, 2) - pow(deltaL, 2) - pow(deltaCab, 2), 0.5))
             deltaC = pow(deltaHab + pow(deltaCab / 1.5, 2), 0.5)
             HdeltaC = 1.3 - 0.07 * deltaC + 0.0005 * pow(deltaC, 2)
             HdeltaL = -0.92 + 0.05 * deltaL - 0.0006 * pow(deltaL, 2)
@@ -126,28 +124,6 @@ class HarmoniaCor(ColorStructureFunction):
         return np.sum([np.sum(harmonia_duas_cores(np.full_like(f[:, i+1:], f[:, i][:, np.newaxis]), f[:, i+1:]) 
         / pow(pow(np.full_like(x[i+1:], x[i]) - x[i+1:], 2) + pow(np.full_like(y[i+1:], y[i]) - y[i+1:], 2), 0.5)) 
         for i in range(MxN - 1)]) / (2 * MxN)
-        
-        # def function1(f):
-        #     return np.concatenate([np.full_like(f[..., i+1:], f[..., i][..., np.newaxis]) for i in range(MxN - 1)], axis=-1) 
-        # 
-        # def function2(f):
-        #     return np.concatenate([f[..., i+1:] for i in range(MxN - 1)], axis=-1)
-        # 
-        # return np.sum(harmonia_duas_cores(function1(f), function2(f)) / pow(pow(function1(x) - function2(x), 2) + pow(function1(y) - function2(y), 2), 0.5)) / (2 * MxN)
-        
-        # def function1(f):
-        #     return np.repeat(f, MxN, axis=-1)
-        # 
-        # def function2(f):
-        #     return np.tile(f, MxN)
-        # 
-        # mask = np.arange(MxN)
-        # mask = np.concatenate((function1(mask)[..., np.newaxis], function2(mask)[..., np.newaxis]), axis=-1)
-        # mask = mask[...,0] < mask[...,1]
-        # 
-        # return np.sum(harmonia_duas_cores(function1(f)[..., mask], function2(f)[..., mask]) 
-        # / pow(pow(function1(x)[..., mask] - function2(x)[..., mask], 2) 
-        # + pow(function1(y)[..., mask] - function2(y)[..., mask], 2), 0.5)) / (2 * MxN)
 
 class EvaluationFunction(ImageFunction):
     def __new__(cls, f, w):
@@ -160,10 +136,6 @@ class EvaluationFunction(ImageFunction):
 class ErroMedioQuadraticoDerived(EvaluationFunction):
     @staticmethod
     def compute(f, w):
-        # f = f.astype(float)
-        # media = filagrain(w, f, 'mean')
-        # dist = np.sum(pow(f - media, 2), axis = 0)
-        # return filagrain(w, dist, 'sum', 'data')
         return filagrain(w, f, ErroMedioQuadratico, 'data', True)
 
 class ErroMedioQuadraticoWeighted(ErroMedioQuadraticoDerived):

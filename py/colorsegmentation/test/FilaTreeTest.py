@@ -29,8 +29,6 @@ class FilaTreeTest(unittest.TestCase):
         ft = self.ft.computeAtt(Entropia, codifica(self.f))
         mins = (ft.getRegMax(False) * 255 / 24).astype(np.uint8)
         
-        # adwrite("../images/test/circulo2gradentropia.png", mins)
-        
         gabMins = adread("../images/test/circulo2gradentropia.png")
         
         self.assertEquals(np.sum(mins == gabMins), 25)
@@ -38,8 +36,6 @@ class FilaTreeTest(unittest.TestCase):
     def testTreeRegAtt(self):
         ft = self.ft.computeRegAtt(Entropia, codifica(self.f))
         mins = (ft.getRegMax(False) * 255 / 24).astype(np.uint8)
-        
-        # adwrite("../images/test/circulo2gradentropiareg.png", mins)
         
         gabMins = adread("../images/test/circulo2gradentropiareg.png")
         

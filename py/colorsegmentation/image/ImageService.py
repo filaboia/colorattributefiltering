@@ -114,13 +114,11 @@ def filagrain(fr, f, function, option='image', combineBands=False):
 
     indices = np.bincount(np.unique(fr))[1:]
     indices = np.cumsum(indices) * indices
-    # LUT = np.vstack((np.zeros(f.shape[0], dtype=LUT.dtype), LUT))[indices]
     LUT = np.vstack((np.zeros(LUT.shape[1], dtype=LUT.dtype), LUT))[indices]
     
     if option == 'data':
         return LUT
         
-    # LUT = np.vstack((np.zeros(f.shape[0], dtype=LUT.dtype), LUT))
     LUT = np.vstack((np.zeros(LUT.shape[1], dtype=LUT.dtype), LUT))
         
     LUT = np.squeeze(LUT)
