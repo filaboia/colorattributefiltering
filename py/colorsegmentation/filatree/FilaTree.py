@@ -3,6 +3,7 @@ from __future__ import division
 from colorsegmentation.image.ImageService import *
 from colorsegmentation.image.Points import *
 import numpy as np
+import numpy.ma as ma
 import copy as cp
 from morph import *
 
@@ -161,6 +162,8 @@ class FilaTree(object):
                 toprocess += node.children
                 if node.mask:
                     image[node.mask.getX() - xmin, node.mask.getY() - ymin] = node.att
+            
+            image = ma.array(image, mask=~self.getRegMax())
                     
         return image
 

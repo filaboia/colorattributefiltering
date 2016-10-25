@@ -134,7 +134,7 @@ def ordena_minimos(mins, inversa=False):
     if inversa:
         args = args[::-1]
     o_mins = np.argsort(args).reshape(mins.shape) + 1
-    reg_mins = filagrain(mmlabel(mins > 0), o_mins, 'min')
+    reg_mins = filagrain(mmlabel(~mins.mask), o_mins, 'min')
     count = np.bincount(np.unique(reg_mins))
     count[0] = 0
     return np.cumsum(count)[reg_mins]
@@ -150,16 +150,21 @@ def region_area(w):
 
 def codifica(f):
     f = f.astype(np.uint32)
-    return normaliza(f[0] * 65536 + f[1] * 256 + f[2])
+    return f[0] * 65536 + f[1] * 256 + f[2]
+
+def decodifica(f):
+    f0 = f / 65536
+    faux = f - (f0 * 65536)
+    f1 = faux / 256
+    f2 = faux - (f1 * 256)
+    return np.array([f0, f1, f2], dtype=np.uint8)
 
 def colorform(f):
     return f.reshape(f.shape[0], np.prod(f.shape[-2:]))
 
 def xyform(f):
     x, y = np.indices(f.shape[-2:])
-    x = x.ravel()
-    y = y.ravel()
-    return np.vstack((x, y)).astype(np.uint16)
+    return np.vstack((x.ravel(), y.ravel())).astype(np.uint16)
 
 def fxyform(f):
     return np.vstack((colorform(f), xyform(f)))

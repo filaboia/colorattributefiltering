@@ -121,6 +121,13 @@ class HarmoniaCor(ColorStructureFunction):
         
         MxN = f.shape[1]
         
+        # cod = codifica(f)
+        # uni = np.unique(cod)
+        # decod = decodifica(uni)
+        # 
+        # harmUni = np.concatenate([harmonia_duas_cores(np.full_like(decod[:, i:], decod[:, i][:, np.newaxis]), decod[:, i:]) for i in range(decod.shape[1])])
+        # par = np.concatenate([(np.full_like(uni[i:], uni[i][np.newaxis]), uni[i:]) for i in range(uni.shape[0])], axis=1)
+        
         return np.sum([np.sum(harmonia_duas_cores(np.full_like(f[:, i+1:], f[:, i][:, np.newaxis]), f[:, i+1:]) 
         / pow(pow(np.full_like(x[i+1:], x[i]) - x[i+1:], 2) + pow(np.full_like(y[i+1:], y[i]) - y[i+1:], 2), 0.5)) 
         for i in range(MxN - 1)]) / (2 * MxN)
@@ -128,7 +135,7 @@ class HarmoniaCor(ColorStructureFunction):
 class EvaluationFunction(ImageFunction):
     def __new__(cls, f, w):
         if (np.prod(f.shape[-2:]) != np.prod(w.shape[-2:])):
-            raise TypeError("Inputs' last two dimensions must match but was " + str(f.shape) + " and " + str(w.shape) + ".")
+            raise TypeError("Inputs' last two dimensions must match but had shape " + str(f.shape) + " and " + str(w.shape) + ".")
         
         return cls.compute(f, w)
     
