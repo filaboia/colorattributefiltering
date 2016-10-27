@@ -24,7 +24,7 @@ class ImageFunctionTest(unittest.TestCase):
         self.assertAlmostEqual(HarmoniaCor(fxyform(self.f)), -3.646325943129034)
     
     def testErroMedioQuadraticoWeighted(self):
-        self.assertAlmostEqual(ErroMedioQuadraticoWeighted(self.f, self.w), 239469.6)
+        self.assertAlmostEqual(ErroMedioQuadraticoWeighted(self.f, self.w), 169153.44)
     
     def testLiuF(self):
         self.assertAlmostEqual(LiuF(self.f, self.w), 87544.494744101408)

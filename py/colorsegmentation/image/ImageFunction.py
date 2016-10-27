@@ -34,10 +34,7 @@ class StructureFunction(ImageFunction):
         if (np.size(xy.shape) != 2 or xy.shape[0] != 2):
             raise TypeError("Input should be in the xy form but had shape " + str(xy.shape) + ".")
         
-        x = xy[0]
-        y = xy[1]
-        
-        return cls.compute(x, y)
+        return cls.compute(xy[0], xy[1])
         
         @staticmethod
         def compute(x, y):
@@ -67,19 +64,14 @@ class EntropiaBanda(ColorFunction):
 class ErroMedioQuadratico(ColorFunction):
     @staticmethod
     def compute(f):
-        media = np.mean(f, axis=1,  keepdims=True)
-        return np.sum(pow(f - media, 2))
+        return np.sum(pow(f - np.mean(f, axis=1,  keepdims=True), 2))
 
 class ColorStructureFunction(ImageFunction):
     def __new__(cls, fxy):
         if (np.size(fxy.shape) != 2 or fxy.shape[0] != 5):
             raise TypeError("Input should be in the fxy form but had shape " + str(fxy.shape) + ".")
         
-        f = fxy[:3]
-        x = fxy[3]
-        y = fxy[4]
-        
-        return cls.compute(f, x, y)
+        return cls.compute(fxy[:3], fxy[3], fxy[4])
     
         @staticmethod
         def compute(f, x, y):
@@ -139,7 +131,7 @@ class EvaluationFunction(ImageFunction):
 class ErroMedioQuadraticoDerived(EvaluationFunction):
     @staticmethod
     def compute(f, w):
-        return filagrain(w, f, ErroMedioQuadratico, 'data', True)
+        return np.squeeze(filagrain(w, f, ErroMedioQuadratico, 'data', True))
 
 class ErroMedioQuadraticoWeighted(ErroMedioQuadraticoDerived):
     @staticmethod
@@ -156,7 +148,7 @@ class LiuF(ErroMedioQuadraticoDerived):
         w = normaliza(w)
         A = region_area(w)
         R = w.max()
-        e2 = np.squeeze(ErroMedioQuadraticoDerived(f, w))
+        e2 = ErroMedioQuadraticoDerived(f, w)
         return pow(R, 0.5) * np.sum(e2 / pow(A, 0.5))
 
 class BorsottiF(ErroMedioQuadraticoDerived):
@@ -164,7 +156,7 @@ class BorsottiF(ErroMedioQuadraticoDerived):
     def compute(f, w):
         w = normaliza(w)
         A = region_area(w)
-        e2 = np.squeeze(ErroMedioQuadraticoDerived(f, w))
+        e2 = ErroMedioQuadraticoDerived(f, w)
         R = w.max()
         NxM = np.sum(A)
         return pow(R, 0.5) / (10000 * NxM) * pow(np.sum(pow(np.bincount(A)[1:], 1 + 1 / (np.arange(A.max()) + 1))) , .5) * np.sum(e2 / pow(A, 0.5))
@@ -174,7 +166,7 @@ class BorsottiQ(ErroMedioQuadraticoDerived):
     def compute(f, w):
         w = normaliza(w)
         A = region_area(w)
-        e2 = np.squeeze(ErroMedioQuadraticoDerived(f, w))
+        e2 = ErroMedioQuadraticoDerived(f, w)
         R = w.max()
         NxM = np.sum(A)
         return pow(R, 0.5) / (10000 * NxM) * np.sum(e2 / (1 + np.log10(A)) + pow(count_regiao(A) / A, 2))
@@ -182,7 +174,7 @@ class BorsottiQ(ErroMedioQuadraticoDerived):
 class EntropiaDerived(EvaluationFunction):
     @staticmethod
     def compute(f, w):
-        return filagrain(w, codifica(f), Entropia, 'data')
+        return np.squeeze(filagrain(w, codifica(f), Entropia, 'data'))
 
 class EntropiaWeighted(EntropiaDerived):
     @staticmethod
@@ -190,7 +182,7 @@ class EntropiaWeighted(EntropiaDerived):
         w = normaliza(w)
         A = region_area(w)
         NxM = np.sum(A)
-        return np.sum(A * np.squeeze(EntropiaDerived(f, w))) / NxM
+        return np.sum(A * EntropiaDerived(f, w)) / NxM
 
 class DesordemZhang(EntropiaWeighted):
     @staticmethod
@@ -207,7 +199,7 @@ class EntropiaZhang(EntropiaWeighted):
 class EntropiaBandaDerived(EvaluationFunction):
     @staticmethod
     def compute(f, w):
-        return np.sum(filagrain(w, f, EntropiaBanda, 'data', True), axis=1)
+        return np.squeeze(np.sum(filagrain(w, f, EntropiaBanda, 'data', True), axis=1))
 
 class EntropiaBandaWeighted(EntropiaBandaDerived):
     @staticmethod
@@ -215,7 +207,7 @@ class EntropiaBandaWeighted(EntropiaBandaDerived):
         w = normaliza(w)
         A = region_area(w)
         NxM = np.sum(A)
-        return np.sum(A * np.squeeze(EntropiaBandaDerived(f, w))) / NxM
+        return np.sum(A * EntropiaBandaDerived(f, w)) / NxM
 
 class EntropiaZhangBanda(EntropiaBandaWeighted):
     @staticmethod
@@ -225,9 +217,7 @@ class EntropiaZhangBanda(EntropiaBandaWeighted):
 class HarmoniaCorDerived(EvaluationFunction):
     @staticmethod
     def compute(f, w):
-        w = w.ravel()[...,np.newaxis]
-        fxy = fxyform(f)[...,np.newaxis]
-        return filagrain(w, fxy, HarmoniaCor, 'data', True)
+        return np.squeeze(filagrain(w.ravel()[...,np.newaxis], fxyform(f)[...,np.newaxis], HarmoniaCor, 'data', True))
 
 class HarmoniaCorWeighted(HarmoniaCorDerived):
     @staticmethod
@@ -235,10 +225,9 @@ class HarmoniaCorWeighted(HarmoniaCorDerived):
         w = normaliza(w)
         A = region_area(w)
         NxM = np.sum(A)
-        return np.sum(A * np.squeeze(HarmoniaCorDerived(f, w))) / NxM
+        return np.sum(A * HarmoniaCorDerived(f, w)) / NxM
 
 class HarmoniaCorSegmented(HarmoniaCorWeighted):
     @staticmethod
     def compute(f, w):
-        s = filagrain(w, f, 'mean').astype(f.dtype)
-        return HarmoniaCorWeighted(s, (w >= 0).astype(w.dtype))
+        return HarmoniaCorWeighted(filagrain(w, f, 'mean').astype(f.dtype), (w >= 0).astype(w.dtype))
