@@ -28,7 +28,7 @@ class Entropia(GrayFunction):
         p = count/np.sum(count)
         log = np.log2(p); log[np.isinf(log)] = 0
         return -np.sum(p*log)
-        
+
 class StructureFunction(ImageFunction):
     def __new__(cls, xy):
         if (np.size(xy.shape) != 2 or xy.shape[0] != 2):
@@ -131,7 +131,7 @@ class EvaluationFunction(ImageFunction):
 class ErroMedioQuadraticoDerived(EvaluationFunction):
     @staticmethod
     def compute(f, w):
-        return np.squeeze(filagrain(w, f, ErroMedioQuadratico, 'data', True))
+        return filagrain(w, f, ErroMedioQuadratico, 'data', True).squeeze(axis=1)
 
 class ErroMedioQuadraticoWeighted(ErroMedioQuadraticoDerived):
     @staticmethod
@@ -174,7 +174,7 @@ class BorsottiQ(ErroMedioQuadraticoDerived):
 class EntropiaDerived(EvaluationFunction):
     @staticmethod
     def compute(f, w):
-        return np.squeeze(filagrain(w, codifica(f), Entropia, 'data'))
+        return filagrain(w, normaliza(codifica(f)), Entropia, 'data').squeeze(axis=1)
 
 class EntropiaWeighted(EntropiaDerived):
     @staticmethod
@@ -183,6 +183,11 @@ class EntropiaWeighted(EntropiaDerived):
         A = region_area(w)
         NxM = np.sum(A)
         return np.sum(A * EntropiaDerived(f, w)) / NxM
+
+class EntropiaVariance(EntropiaDerived):
+    @staticmethod
+    def compute(f, w):
+        return np.var(EntropiaDerived(f, w))
 
 class DesordemZhang(EntropiaWeighted):
     @staticmethod
@@ -199,7 +204,7 @@ class EntropiaZhang(EntropiaWeighted):
 class EntropiaBandaDerived(EvaluationFunction):
     @staticmethod
     def compute(f, w):
-        return np.squeeze(np.sum(filagrain(w, f, EntropiaBanda, 'data', True), axis=1))
+        return filagrain(w, f, EntropiaBanda, 'data', True).squeeze(axis=1)
 
 class EntropiaBandaWeighted(EntropiaBandaDerived):
     @staticmethod
@@ -217,7 +222,7 @@ class EntropiaZhangBanda(EntropiaBandaWeighted):
 class HarmoniaCorDerived(EvaluationFunction):
     @staticmethod
     def compute(f, w):
-        return np.squeeze(filagrain(w.ravel()[...,np.newaxis], fxyform(f)[...,np.newaxis], HarmoniaCor, 'data', True))
+        return filagrain(w.ravel()[...,np.newaxis], fxyform(f)[...,np.newaxis], HarmoniaCor, 'data', True).squeeze(axis=1)
 
 class HarmoniaCorWeighted(HarmoniaCorDerived):
     @staticmethod
