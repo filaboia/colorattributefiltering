@@ -21,7 +21,7 @@ class ImageFunctionTest(unittest.TestCase):
         self.assertAlmostEqual(ErroMedioQuadratico(colorform(self.f)), 259377.12)
     
     def testHarmoniaCor(self):
-        self.assertAlmostEqual(HarmoniaCor(fxyform(self.f)), -3.646325943129034)
+        self.assertAlmostEqual(HarmoniaCor(fxyform(self.f)), -3.63, delta=0.01)
     
     def testErroMedioQuadraticoWeighted(self):
         self.assertAlmostEqual(ErroMedioQuadraticoWeighted(self.f, self.w), 169153.44)
@@ -51,10 +51,10 @@ class ImageFunctionTest(unittest.TestCase):
         self.assertAlmostEqual(EntropiaZhangBanda(self.f, self.w), 3.4853663785109843)
     
     def testHarmoniaCorWeighted(self):
-        self.assertAlmostEqual(HarmoniaCorWeighted(self.f, self.w), -2.4063578349317885)
+        self.assertAlmostEqual(HarmoniaCorWeighted(self.f, self.w), -2.40, delta=0.01)
     
     def testHarmoniaCorSegmented(self):
-        self.assertAlmostEqual(HarmoniaCorSegmented(self.f, self.w), -0.31364075455312684)
+        self.assertAlmostEqual(HarmoniaCorSegmented(self.f, self.w), -0.25, delta=0.01)
 
 suite = unittest.TestLoader().loadTestsFromTestCase(ImageFunctionTest)
 unittest.TextTestRunner(verbosity=2).run(suite)

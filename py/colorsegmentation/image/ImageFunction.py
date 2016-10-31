@@ -71,7 +71,7 @@ class ColorStructureFunction(ImageFunction):
         if (np.size(fxy.shape) != 2 or fxy.shape[0] != 5):
             raise TypeError("Input should be in the fxy form but had shape " + str(fxy.shape) + ".")
         
-        return cls.compute(fxy[:3], fxy[3], fxy[4])
+        return cls.compute(fxy[:3].astype(np.uint8), fxy[3], fxy[4])
     
         @staticmethod
         def compute(f, x, y):
@@ -91,11 +91,11 @@ class HarmoniaCor(ColorStructureFunction):
                 return -0.23 - 0.35 * np.sin(hab + 0.83) - 0.18 * np.sin(2 * hab + 1.55)
             
             def atualiza_range(p):
-                novop = np.empty(p.shape, dtype=np.float)    
+                novop = np.empty(p.shape, dtype=np.float16)    
                 novop[0] = p[0] / 255. * 100. 
                 novop[1] = p[1] / 255. * 254. - 127.
                 novop[2] = p[2] / 255. * 254. - 127.
-                return novop.astype(int)
+                return novop
             
             p1 = atualiza_range(p1)
             p2 = atualiza_range(p2)
