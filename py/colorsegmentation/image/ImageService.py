@@ -124,7 +124,7 @@ def filagrain(fr, f, function, option='image', combineBands=False):
     LUT = np.squeeze(LUT)
         
     image = LUT[fr]
-    if not bidimensional:
+    if not bidimensional and not combineBands:
         image = np.rollaxis(image, 2)
     
     return image

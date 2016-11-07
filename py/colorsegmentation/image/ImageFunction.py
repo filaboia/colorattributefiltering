@@ -113,8 +113,8 @@ class HarmoniaCor(ColorStructureFunction):
         
         MxN = f.shape[1]
         
-        return np.sum([np.sum(harmonia_duas_cores(np.full_like(f[:, i+1:], f[:, i][:, np.newaxis]), f[:, i+1:]) 
-        / pow(pow(np.full_like(x[i+1:], x[i]) - x[i+1:], 2) + pow(np.full_like(y[i+1:], y[i]) - y[i+1:], 2), 0.5)) 
+        return np.sum([np.sum(harmonia_duas_cores(np.full_like(f[:, i+1:], f[:, i:i+1]), f[:, i+1:]) 
+        / pow(pow(np.full_like(x[i+1:], x[i:i+1]) - x[i+1:], 2) + pow(np.full_like(y[i+1:], y[i:i+1]) - y[i+1:], 2), 0.5)) 
         for i in range(MxN - 1)]) / (2 * MxN)
 
 class EvaluationFunction(ImageFunction):
@@ -133,14 +133,15 @@ class ErroMedioQuadraticoDerived(EvaluationFunction):
     def compute(f, w):
         return filagrain(w, f, ErroMedioQuadratico, 'data', True).squeeze(axis=1)
 
-class ErroMedioQuadraticoWeighted(ErroMedioQuadraticoDerived):
+class ErroMedioQuadraticoWeighted(EvaluationFunction):
     @staticmethod
     def compute(f, w):
-        w = normaliza(w)
-        A = region_area(w)
-        NxM = np.sum(A)
-        e2 = ErroMedioQuadraticoDerived(f, w)
-        return np.sum(A * e2) / NxM
+        return np.mean(filagrain(w, f, ErroMedioQuadratico, 'image', True))
+
+class ErroMedioQuadraticoVariance(EvaluationFunction):
+    @staticmethod
+    def compute(f, w):
+        return np.var(filagrain(w, f, ErroMedioQuadratico, 'image', True))
 
 class LiuF(ErroMedioQuadraticoDerived):
     @staticmethod
@@ -176,18 +177,15 @@ class EntropiaDerived(EvaluationFunction):
     def compute(f, w):
         return filagrain(w, normaliza(codifica(f)), Entropia, 'data').squeeze(axis=1)
 
-class EntropiaWeighted(EntropiaDerived):
+class EntropiaWeighted(EvaluationFunction):
     @staticmethod
     def compute(f, w):
-        w = normaliza(w)
-        A = region_area(w)
-        NxM = np.sum(A)
-        return np.sum(A * EntropiaDerived(f, w)) / NxM
+        return np.mean(filagrain(w, normaliza(codifica(f)), Entropia))
 
-class EntropiaVariance(EntropiaDerived):
+class EntropiaVariance(EvaluationFunction):
     @staticmethod
     def compute(f, w):
-        return np.var(EntropiaDerived(f, w))
+        return np.var(filagrain(w, normaliza(codifica(f)), Entropia))
 
 class DesordemZhang(EntropiaWeighted):
     @staticmethod
@@ -206,13 +204,10 @@ class EntropiaBandaDerived(EvaluationFunction):
     def compute(f, w):
         return filagrain(w, f, EntropiaBanda, 'data', True).squeeze(axis=1)
 
-class EntropiaBandaWeighted(EntropiaBandaDerived):
+class EntropiaBandaWeighted(EvaluationFunction):
     @staticmethod
     def compute(f, w):
-        w = normaliza(w)
-        A = region_area(w)
-        NxM = np.sum(A)
-        return np.sum(A * EntropiaBandaDerived(f, w)) / NxM
+        return np.mean(filagrain(w, f, EntropiaBanda, 'image', True))
 
 class EntropiaZhangBanda(EntropiaBandaWeighted):
     @staticmethod
@@ -224,13 +219,10 @@ class HarmoniaCorDerived(EvaluationFunction):
     def compute(f, w):
         return filagrain(w.ravel()[...,np.newaxis], fxyform(f)[...,np.newaxis], HarmoniaCor, 'data', True).squeeze(axis=1)
 
-class HarmoniaCorWeighted(HarmoniaCorDerived):
+class HarmoniaCorWeighted(EvaluationFunction):
     @staticmethod
     def compute(f, w):
-        w = normaliza(w)
-        A = region_area(w)
-        NxM = np.sum(A)
-        return np.sum(A * HarmoniaCorDerived(f, w)) / NxM
+        return np.mean(filagrain(w.ravel()[...,np.newaxis], fxyform(f)[...,np.newaxis], HarmoniaCor, 'image', True))
 
 class HarmoniaCorSegmented(HarmoniaCorWeighted):
     @staticmethod
