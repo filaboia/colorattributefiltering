@@ -150,9 +150,6 @@ class FilaTree(object):
                         maxchild, maxatt = (child, child.att)
                 if maxchild:
                     node.mask = maxchild.mask
-                    
-                    node.att = node.att
-                    
                     maxchild.mask = None
 
             toprocess = [ft]
@@ -356,6 +353,23 @@ class FilaTree(object):
                 w_reg += 1
                         
         return image
+    
+    def equalizeChildAtt(self):
+        ft = cp.deepcopy(self)
+        
+        toprocess = [ft]
+        
+        while toprocess:
+            node = toprocess.pop()
+            toprocess += node.children
+            maxAtt = float("-inf")
+            for child in node.children:
+                if child.att > maxAtt:
+                    maxAtt = child.att
+            for child in node.children:
+                child.att = maxAtt
+        
+        return ft       
     
     def status(self):
         naofolha = 0
