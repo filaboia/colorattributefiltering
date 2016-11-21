@@ -14,17 +14,14 @@ class ImageFunctionTest(unittest.TestCase):
     def testEntropia(self):
         self.assertAlmostEqual(Entropia(codifica(self.f).ravel()), 1.6430741894285699)
     
-    def testEntropiaBanda(self):
-        self.assertAlmostEqual(EntropiaBanda(colorform(self.f)), 4.7480495677664774)
-    
     def testErroMedioQuadratico(self):
         self.assertAlmostEqual(ErroMedioQuadratico(colorform(self.f)), 259377.12)
     
     def testHarmoniaCor(self):
         self.assertAlmostEqual(HarmoniaCor(fxyform(self.f)), -3.63, delta=0.01)
     
-    def testErroMedioQuadraticoWeighted(self):
-        self.assertAlmostEqual(ErroMedioQuadraticoWeighted(self.f, self.w), 169153.44)
+    def testErroMedioQuadraticoPonderado(self):
+        self.assertAlmostEqual(ErroMedioQuadraticoPonderado(self.f, self.w), 169153.44)
     
     def testLiuF(self):
         self.assertAlmostEqual(LiuF(self.f, self.w), 87544.494744101408)
@@ -35,8 +32,14 @@ class ImageFunctionTest(unittest.TestCase):
     def testBorsottiQ(self):
         self.assertAlmostEqual(BorsottiQ(self.f, self.w), 0.62126878475045866)
     
-    def testEntropiaWeighted(self):
-        self.assertAlmostEqual(EntropiaWeighted(self.f, self.w), 0.92114609454120744)
+    def testEntropiaPonderada(self):
+        self.assertAlmostEqual(EntropiaPonderada(self.f, self.w), 0.92114609454120744)
+        
+    def testEntropiaVariancia(self):
+        self.assertAlmostEqual(EntropiaVariancia(self.f, self.w), 0.015503051322687263)
+        
+    def testEntropiaSoma(self):
+        self.assertAlmostEqual(EntropiaSoma(self.f, self.w), 23.028652363530181)
     
     def testDesordemZhang(self):
         self.assertAlmostEqual(DesordemZhang(self.f, self.w), 1.3026972998271849)
@@ -44,17 +47,11 @@ class ImageFunctionTest(unittest.TestCase):
     def testEntropiaZhang(self):
         self.assertAlmostEqual(EntropiaZhang(self.f, self.w), 1.6430741894285696)
     
-    def testEntropiaBandaWeighted(self):
-        self.assertAlmostEqual(EntropiaBandaWeighted(self.f, self.w), 2.7634382836236218)
+    def testHarmoniaCorPonderada(self):
+        self.assertAlmostEqual(HarmoniaCorPonderada(self.f, self.w), -2.40, delta=0.01)
     
-    def testEntropiaZhangBanda(self):
-        self.assertAlmostEqual(EntropiaZhangBanda(self.f, self.w), 3.4853663785109843)
-    
-    def testHarmoniaCorWeighted(self):
-        self.assertAlmostEqual(HarmoniaCorWeighted(self.f, self.w), -2.40, delta=0.01)
-    
-    def testHarmoniaCorSegmented(self):
-        self.assertAlmostEqual(HarmoniaCorSegmented(self.f, self.w), -0.25, delta=0.01)
+    def testHarmoniaCorSegmentada(self):
+        self.assertAlmostEqual(HarmoniaCorSegmentada(self.f, self.w), -0.25, delta=0.01)
 
 suite = unittest.TestLoader().loadTestsFromTestCase(ImageFunctionTest)
 unittest.TextTestRunner(verbosity=2).run(suite)
