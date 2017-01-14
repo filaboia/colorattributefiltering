@@ -2,50 +2,44 @@
 from __future__ import division
 import numpy as np
 import pandas as pd
-from ia636 import *
 from morph import *
             
 def gradient(f, option='euclid'):
-    max_dtype = np.iinfo(f.dtype).max
-
-    lmax = np.zeros(f[0].shape)
-    lmax[:-1] = f[0,1:]
-    lmex = np.zeros(f[0].shape)
-    lmex[1:] = f[0,:-1] 
-    amax = np.zeros(f[0].shape)
-    amax[:-1] = f[1,1:]
-    amex = np.zeros(f[0].shape)
-    amex[1:] = f[1,:-1] 
-    bmax = np.zeros(f[0].shape)
-    bmax[:-1] = f[2,1:]
-    bmex = np.zeros(f[0].shape)
-    bmex[1:] = f[2,:-1] 
-    lmay = np.zeros(f[0].shape)
-    lmay[:,:-1] = f[0,:,1:] 
-    lmey = np.zeros(f[0].shape)
-    lmey[:,1:] = f[0,:,:-1]
-    amay = np.zeros(f[0].shape)
-    amay[:,:-1] = f[1,:,1:] 
-    amey = np.zeros(f[0].shape)
-    amey[:,1:] = f[1,:,:-1]
-    bmay = np.zeros(f[0].shape)
-    bmay[:,:-1] = f[2,:,1:]
-    bmey = np.zeros(f[0].shape)
-    bmey[:,1:] = f[2,:,:-1]
+    def desloca(f, dx, dy):
+        g = np.copy(f)
+        zmax, xmax, ymax = f.shape
+        g[:,np.clip(dx, 0, xmax):np.clip(xmax+dx, 0, xmax),np.clip(dy, 0, ymax):np.clip(ymax+dy, 0, ymax)] = f[:,np.clip(-dx, 0, xmax):np.clip(xmax-dx, 0, xmax),np.clip(-dy, 0, ymax):np.clip(ymax-dy, 0, ymax)]
+        return g
     
-    if option =='euclid':
-        g = pow((pow(lmax-lmex,2) + pow(amax-amex,2) + pow(bmax-bmex,2) + pow(lmay-lmey,2) + pow(amay-amey,2) + pow(bmay-bmey,2))/6, 1/2)
-    elif option == 'taxi':
-        g = (abs(lmax-lmex) + abs(amax-amex) + abs(bmax-bmex) + abs(lmay-lmey) + abs(amay-amey) + abs(bmay-bmey)) / 6
-    elif option == 'chess':
-        g = np.fmax(np.fmax(abs(lmax-lmex), np.fmax(abs(amax-amex), abs(bmax-bmex))), np.fmax(abs(lmay-lmey), np.fmax(abs(amay-amey), abs(bmay-bmey))))
-    elif option == 'sobel':
-        g = pow((pow(iasobel(f[0])[0], 2) + pow(iasobel(f[1])[0], 2) + pow(iasobel(f[2])[0], 2))/12, 1/2)
-    else:
-        g = f
-    return np.clip(np.round(g), 0, max_dtype).astype(f.dtype)    
+    def euclid(f, fd):
+        return pow(np.sum(pow(f - fd, 2), axis=0),0.5)
     
-def filagrain(fr, f, function, option='image', combineBands=False):
+    def taxi(f, fd):
+        return np.sum(abs(f - fd), axis=0)
+    
+    def chess(f, fd):
+        return np.max(abs(f - fd), axis=0)
+    
+    def identity(f, fd=None):
+        return f
+    
+    try:    
+        distance = locals()[option]
+    except:
+        distance = identity
+    
+    fdtype = f.dtype
+    max_dtype = np.iinfo(fdtype).max
+    
+    f = f.astype(np.float)
+    
+    g = np.max([distance(f, desloca(f, 0, 1)), distance(f, desloca(f, 0, -1)), distance(f, desloca(f, 1, 0)), distance(f, desloca(f, -1, 0))], axis=0) 
+    
+    g = (g - g.min()) / (g.max() - g.min()) * max_dtype   
+        
+    return np.clip(np.round(g), 0, max_dtype).astype(fdtype)    
+    
+def grain(fr, f, function, option='image', combineBands=False):
     def codifica(f):
         f = f.astype(np.uint64)
         cf = np.zeros(f.shape[1], dtype=np.uint64)
@@ -134,7 +128,7 @@ def ordena_minimos(mins, inversa=False):
     if inversa:
         args = args[::-1]
     o_mins = np.argsort(args).reshape(mins.shape) + 1
-    reg_mins = filagrain(mmlabel(~mins.mask), o_mins, 'min')
+    reg_mins = grain(mmlabel(~mins.mask), o_mins, 'min')
     count = np.bincount(np.unique(reg_mins))
     count[0] = 0
     return np.cumsum(count)[reg_mins]

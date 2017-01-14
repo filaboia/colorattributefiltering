@@ -11,5 +11,5 @@ setup(name='colorsegmentation',
     author='Sergio Grijo de Sousa Filho',
     author_email='filaboia@gmail.com',
     url='http://www.github.com/filaboia/colorsegmentation',
-    packages=['colorsegmentation', 'colorsegmentation.image', 'colorsegmentation.filatree'],
+    packages=['colorsegmentation', 'colorsegmentation.image', 'colorsegmentation.maxtree'],
 )

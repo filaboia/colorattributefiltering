@@ -3,18 +3,35 @@ from __future__ import division
 import numpy as np
 
 def convertrgbtoxyz(f):
+    def function(t):
+        g = np.empty(t.shape)
+        mask = f > 0.04045
+        g[mask] = pow((t[mask] + 0.055) / 1.055, 2.4)
+        g[~mask] = t[~mask] / 12.92
+        return g
+    
+    f = function(f / 255.)
+    
     g = np.empty(f.shape)
     g[0] = f[0] * 0.412453 + f[1] * 0.357580 + f[2] * 0.180423
     g[1] = f[0] * 0.212671 + f[1] * 0.715160 + f[2] * 0.072169 
     g[2] = f[0] * 0.019334 + f[1] * 0.119193 + f[2] * 0.950227 
-    return g
+    return g * 100
     
 def convertxyztorgb(f):
+    def function(t):
+        g = np.empty(t.shape)
+        mask = t > 0.0031308
+        g[mask] = 1.055 * pow(t[mask], 1. / 2.4) - 0.055
+        g[~mask] = 12.92 * t[~mask]
+        return g
+    
+    f = f / 100.
     g = np.empty(f.shape)
     g[0] = f[0] * 3.240479  + f[1] * -1.53715  + f[2] * -0.498535 
     g[1] = f[0] * -0.969256 + f[1] * 1.875991  + f[2] * 0.041556 
     g[2] = f[0] * 0.055648  + f[1] * -0.204043 + f[2] * 1.057311
-    return g
+    return function(g) * 255.
     
 def convertrgbtolab(f):
     def function(t):
@@ -29,9 +46,9 @@ def convertrgbtolab(f):
     g = np.empty(f.shape)
     h = convertrgbtoxyz(f)
     
-    X = h[0] / 0.950456 / max_dtype
-    Y = h[1] / 1.       / max_dtype
-    Z = h[2] / 1.088754 / max_dtype
+    X = h[0] / 0.950456 / 100
+    Y = h[1] / 1.       / 100
+    Z = h[2] / 1.088754 / 100
     
     g[0] = 116. * function(Y) - 16.
     g[1] = 500. * (function(X) - function(Y))
@@ -60,9 +77,9 @@ def convertlabtorgb(f):
     faux[2] = f[2] / max_dtype * 254. - 127.
         
     g = np.empty(f.shape)
-    g[0] = function(faux[1]/500. + ((faux[0]+16.)/116.)) * 0.950456 * max_dtype
-    g[1] = function((faux[0]+16.)/116.) * max_dtype
-    g[2] = function(((faux[0]+16.)/116.) - faux[2]/200.) * 1.088754 * max_dtype
+    g[0] = function(faux[1]/500. + ((faux[0]+16.)/116.)) * 0.950456 * 100
+    g[1] = function((faux[0]+16.)/116.) * 100
+    g[2] = function(((faux[0]+16.)/116.) - faux[2]/200.) * 1.088754 * 100
     
     h = convertxyztorgb(g)
     
@@ -77,9 +94,9 @@ def convertrgbtoluv(f):
     ul = np.zeros((x,y))
     h = convertrgbtoxyz(f)
     
-    X = h[0] / 0.950456 / max_dtype
-    Y = h[1] / 1.       / max_dtype
-    Z = h[2] / 1.088754 / max_dtype
+    X = h[0] / 0.950456 / 100
+    Y = h[1] / 1.       / 100
+    Z = h[2] / 1.088754 / 100
     
     mask = Y > 0.008856
     g[0][mask] = 116. * pow(Y[mask], 1./3.) - 16.
@@ -124,9 +141,9 @@ def convertluvtorgb(f):
     g[0][mask] = g[1][mask] * 9. * ul[mask] / (4. * vl[mask])
     g[2][mask] = g[1][mask] * (12. - 3. * ul[mask] - 20. * vl[mask]) / (4. * vl[mask])
     
-    g[0] *= 0.950456 * max_dtype
-    g[1] *= 1. * max_dtype
-    g[2] *= 1.088754 * max_dtype
+    g[0] *= 0.950456 * 100
+    g[1] *= 1. * 100
+    g[2] *= 1.088754 * 100
     
     h = convertxyztorgb(g)
     return np.clip(np.round(h), 0, max_dtype).astype(f.dtype)

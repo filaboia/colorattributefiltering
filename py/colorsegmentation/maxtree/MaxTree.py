@@ -6,8 +6,11 @@ import numpy as np
 import numpy.ma as ma
 import copy as cp
 from morph import *
+import sys
 
-class FilaTree(object):
+sys.setrecursionlimit(10000) 
+
+class MaxTree(object):
     def __init__(self, f=None):
         self.children = []
         self.level = None
@@ -47,7 +50,7 @@ class FilaTree(object):
                 label = label[np.newaxis]
 
             for i in range(1, label.max() + 1):
-                child = FilaTree()
+                child = MaxTree()
                 node.children.append(child)
                 child.mask = Points(np.uint16, label == i)
                 child.mask.setX(child.mask.getX() + offset[0])
@@ -220,6 +223,7 @@ class FilaTree(object):
                 mask = Points(np.uint16, ws[node.mask()][0] == ws)
             regdict[node.getKey()] = mask
             node.att = ImageFunction(orig[..., mask.getX(), mask.getY()])
+            # node.att = ImageFunction(orig[..., mask.getX(), mask.getY()], ws[mask()])
             
         return ft
         
