@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from morph import *
             
-def gradient(f, option='euclid'):
+def gradient(f, gradientType=1, distanceType='euclid'):
     def desloca(f, dx, dy):
         g = np.copy(f)
         zmax, xmax, ymax = f.shape
@@ -24,7 +24,7 @@ def gradient(f, option='euclid'):
         return f
     
     try:    
-        distance = locals()[option]
+        distance = locals()[distanceType]
     except:
         distance = identity
     
@@ -33,7 +33,19 @@ def gradient(f, option='euclid'):
     
     f = f.astype(np.float)
     
-    g = np.max([distance(f, desloca(f, 0, 1)), distance(f, desloca(f, 0, -1)), distance(f, desloca(f, 1, 0)), distance(f, desloca(f, -1, 0))], axis=0) 
+    distances = [distance(f, desloca(f, 0, 1)), distance(f, desloca(f, 0, -1)), distance(f, desloca(f, 1, 0)), distance(f, desloca(f, -1, 0))]
+    
+    if gradientType == 1:
+        g = np.max(distances, axis=0) 
+    elif gradientType == 2:
+        g = np.max(distances, axis=0) - np.min(distances, axis=0) 
+    elif gradientType == 3:
+        distances += [distance(desloca(f, 0, 1), desloca(f, 0, -1)), distance(desloca(f, 0, 1), desloca(f, 1, 0)), distance(desloca(f, 0, 1), desloca(f, -1, 0))]
+        distances += [distance(desloca(f, 0, -1), desloca(f, 1, 0)), distance(desloca(f, 0, -1), desloca(f, -1, 0))]
+        distances += [distance(desloca(f, 1, 0), desloca(f, -1, 0))]
+        g = np.max(distances, axis=0) 
+    else:
+        raise ValueError
     
     g = (g - g.min()) / (g.max() - g.min()) * max_dtype   
         

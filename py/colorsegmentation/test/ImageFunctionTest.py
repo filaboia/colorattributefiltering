@@ -1,6 +1,6 @@
 import unittest
 from colorsegmentation.image.ImageFunction import *
-from colorsegmentation.image.ImageService import xyform, fxyform, codifica, colorform
+from colorsegmentation.image.ImageService import fxyform, codifica, colorform
 from adpil import adread
 
 class ImageFunctionTest(unittest.TestCase):
@@ -9,7 +9,7 @@ class ImageFunctionTest(unittest.TestCase):
         self.w = adread("../images/test/circulo2seg.png")
     
     def testArea(self):
-        self.assertEquals(Area(xyform(self.f)), 25)
+        self.assertEquals(Area(colorform(self.f)[0]), 25)
     
     def testEntropy(self):
         self.assertAlmostEqual(Entropy(codifica(self.f).ravel()), 1.6430741894285699)

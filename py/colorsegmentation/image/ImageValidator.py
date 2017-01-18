@@ -9,7 +9,7 @@ class ImageValidator(object):
         
 class GrayImageValidator(ImageValidator):
     def validate(self, f):
-        if (np.size(f.shape) != 1):
+        if (np.size(f.shape) > 1):
             raise TypeError("Input should be in the gray f form but had shape " + str(f.shape) + ".")
 
 class CoordinatesImageValidator(ImageValidator):

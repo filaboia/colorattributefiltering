@@ -169,6 +169,8 @@ class MaxTree(object):
 
     def computeAtt(self, ImageFunction, orig=None):
         ft = cp.deepcopy(self)
+        
+        image = ft.getImage()
 
         toprocess = [ft]
         postorder = []
@@ -189,7 +191,7 @@ class MaxTree(object):
             mask.merge(node.mask)
             maskdict[node.getKey()] = mask
             if orig is None:
-                node.att = ImageFunction(np.vstack(mask()))
+                node.att = ImageFunction(image[mask()])
             else:
                 node.att = ImageFunction(orig[..., mask.getX(), mask.getY()])
 
@@ -289,6 +291,21 @@ class MaxTree(object):
                     node.mask.merge(child.getPoints(lambda x: x.mask))
             node.children = newchildren
 
+        return ft
+    
+    def upperOpen(self, value):
+        ft = cp.deepcopy(self)
+
+        toprocess = [ft]
+
+        while toprocess:
+            node = toprocess.pop()
+            if node.att > value:
+                toprocess += node.children
+            else:
+                node.mask = node.getPoints(lambda x: x.mask)
+                node.children = []
+                
         return ft
         
     def openReg(self, n_reg):

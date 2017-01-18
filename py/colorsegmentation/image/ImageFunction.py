@@ -7,6 +7,7 @@ import numpy as np
 
 class ImageFunction(object):
     def __new__(cls, f):
+        f = np.array(f)
         cls.validate(f)
         return cls.compute(*cls.adapt(f))
     
@@ -34,10 +35,25 @@ class GrayFunction(ImageFunction):
 class Entropy(GrayFunction):
     @staticmethod
     def compute(f):
-        count = np.bincount(normaliza(f))
+        count = np.bincount(normaliza(f+1))[1:]
         p = count/np.sum(count)
-        log = np.log2(p); log[np.isinf(log)] = 0
-        return -np.sum(p*log)
+        log = np.log2(p);
+        return abs(np.sum(p*log))
+
+class Area(GrayFunction):
+    @staticmethod
+    def compute(f):
+        return np.sum(f >= 0)
+
+class Height(GrayFunction):
+    @staticmethod
+    def compute(f):
+        return np.max(f) - np.min(f)
+
+class Volume(GrayFunction):
+    @staticmethod
+    def compute(f):
+        return np.sum(f - np.min(f) + 1)
 
 class CoordinatesFunction(ImageFunction):
     @staticmethod
@@ -47,11 +63,6 @@ class CoordinatesFunction(ImageFunction):
     @staticmethod
     def adapt(f):
         return CoordinatesImageAdapter().adapt(f)
-
-class Area(CoordinatesFunction):
-    @staticmethod
-    def compute(x, y):
-        return x.shape[0]
 
 class ColorFunction(ImageFunction):
     @staticmethod
