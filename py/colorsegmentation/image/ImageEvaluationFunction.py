@@ -36,7 +36,7 @@ class LiuF(AverageColorErrorDerived):
         w = normaliza(w)
         A = region_area(w)
         R = w.max()
-        e2 = AverageColorErrorDerived(f, w)
+        e2 = pow(AverageColorErrorDerived(f, w), 2)
         return pow(R, 0.5) * np.sum(e2 / pow(A, 0.5))
 
 class BorsottiF(AverageColorErrorDerived):
@@ -44,7 +44,7 @@ class BorsottiF(AverageColorErrorDerived):
     def compute(f, w):
         w = normaliza(w)
         A = region_area(w)
-        e2 = AverageColorErrorDerived(f, w)
+        e2 = pow(AverageColorErrorDerived(f, w), 2)
         R = w.max()
         NxM = np.sum(A)
         return pow(R, 0.5) / (10000 * NxM) * pow(np.sum(pow(np.bincount(A)[1:], 1 + 1 / (np.arange(A.max()) + 1))) , .5) * np.sum(e2 / pow(A, 0.5))
@@ -54,7 +54,7 @@ class BorsottiQ(AverageColorErrorDerived):
     def compute(f, w):
         w = normaliza(w)
         A = region_area(w)
-        e2 = AverageColorErrorDerived(f, w)
+        e2 = pow(AverageColorErrorDerived(f, w), 2)
         R = w.max()
         NxM = np.sum(A)
         return pow(R, 0.5) / (10000 * NxM) * np.sum(e2 / (1 + np.log10(A)) + pow(count_regiao(A) / A, 2))

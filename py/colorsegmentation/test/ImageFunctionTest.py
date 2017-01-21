@@ -15,7 +15,7 @@ class ImageFunctionTest(unittest.TestCase):
         self.assertAlmostEqual(Entropy(codifica(self.f).ravel()), 1.6430741894285699)
     
     def testAverageColorError(self):
-        self.assertAlmostEqual(AverageColorError(colorform(self.f)), 6062890.18, delta=0.01)
+        self.assertAlmostEqual(AverageColorError(colorform(self.f)), 2462.29, delta=0.01)
     
     def testColorHarmony(self):
         self.assertAlmostEqual(ColorHarmony(colorform(self.f)), -0.18, delta=0.01)

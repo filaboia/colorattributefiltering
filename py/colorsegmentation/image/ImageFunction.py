@@ -76,7 +76,7 @@ class ColorFunction(ImageFunction):
 class AverageColorError(ColorFunction):
     @staticmethod
     def compute(f):
-        return pow(np.sum(pow(np.sum(pow(f - np.mean(f, axis=1,  keepdims=True), 2), axis=0), 0.5)), 2)
+        return np.sum(pow(np.sum(pow(f - np.mean(f, axis=1,  keepdims=True), 2), axis=0), 0.5))
 
 class ColorHarmony(ColorFunction):
     @staticmethod

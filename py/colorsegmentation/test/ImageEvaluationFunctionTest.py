@@ -9,10 +9,10 @@ class ImageEvaluationFunctionTest(unittest.TestCase):
         self.w = adread("../images/test/circulo2seg.png")
     
     def testAverageColorErrorWeighted(self):
-        self.assertAlmostEqual(AverageColorErrorWeighted(self.f, self.w), 3128160.2, delta=0.01)
+        self.assertAlmostEqual(AverageColorErrorWeighted(self.f, self.w), 1645.04, delta=0.01)
     
     def testLiuF(self):
-        self.assertAlmostEqual(LiuF(self.f, self.w), 1302692.06, delta=0.01)
+        self.assertAlmostEqual(LiuF(self.f, self.w), 1302692.44, delta=0.01)
     
     def testBorsottiF(self):
         self.assertAlmostEqual(BorsottiF(self.f, self.w), 7.37, delta=0.01)
