@@ -89,7 +89,7 @@ class ZhangHw(EntropyWeighted):
 class ZhangE(EntropyWeighted):
     @staticmethod
     def compute(f, w):
-        return EntropyWeighted(f, w) + Entropy(w.ravel())
+        return EntropyWeighted(f, w)*22/Entropy(normaliza(codifica(f)).ravel()) + Entropy(w.ravel())
 
 class ColorHarmonyDerived(ImageEvaluationFunction):
     @staticmethod
@@ -99,7 +99,7 @@ class ColorHarmonyDerived(ImageEvaluationFunction):
 class ColorHarmonyWeighted(ImageEvaluationFunction):
     @staticmethod
     def compute(f, w):
-        return np.mean(grain(w.ravel()[...,np.newaxis], colorform(f)[...,np.newaxis], ColorHarmony, 'image', True))
+        return np.mean(grain(w.ravel()[...,np.newaxis], fxyform(f)[...,np.newaxis], ColorHarmony, 'image', True))
 
 class ColorHarmonySegmented(ColorHarmonyWeighted):
     @staticmethod

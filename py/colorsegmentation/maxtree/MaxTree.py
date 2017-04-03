@@ -5,7 +5,7 @@ from colorsegmentation.image.Points import *
 import numpy as np
 import numpy.ma as ma
 import copy as cp
-from morph import *
+from ia870 import *
 import sys
 
 sys.setrecursionlimit(10000) 
@@ -44,7 +44,7 @@ class MaxTree(object):
             node.mask.setX(node.mask.getX() + offset[0])
             node.mask.setY(node.mask.getY() + offset[1])
 
-            label = mmlabel(region)
+            label = ialabel(region)
 
             if len(label.shape) == 1:
                 label = label[np.newaxis]
@@ -191,9 +191,10 @@ class MaxTree(object):
             mask.merge(node.mask)
             maskdict[node.getKey()] = mask
             if orig is None:
-                node.att = ImageFunction(image[mask()])
+                pointToProcess = image[mask()]
             else:
-                node.att = ImageFunction(orig[..., mask.getX(), mask.getY()])
+                pointToProcess = orig[..., mask.getX(), mask.getY()]
+            node.att = ImageFunction(np.vstack((pointToProcess, mask.getX(), mask.getY())))
 
         return ft
 
@@ -201,8 +202,8 @@ class MaxTree(object):
         ft = self.simplify()
     
         igrad = ft.getImage()
-        grad = mmneg(igrad)
-        ws = mmcwatershed(grad, ft.getRegMax(), mmsecross(), 'REGIONS')
+        grad = ianeg(igrad)
+        ws = iacwatershed(grad, ft.getRegMax(), iasecross(), 'REGIONS')
     
         preorder = [ft]
         postorder = []
@@ -224,43 +225,10 @@ class MaxTree(object):
             else:
                 mask = Points(np.uint16, ws[node.mask()][0] == ws)
             regdict[node.getKey()] = mask
-            node.att = ImageFunction(orig[..., mask.getX(), mask.getY()])
-            # node.att = ImageFunction(orig[..., mask.getX(), mask.getY()], ws[mask()])
+            node.att = ImageFunction(np.vstack((orig[..., mask.getX(), mask.getY()], mask.getX(), mask.getY())))
             
         return ft
         
-    def computeRegAttFraction(self, ImageFunction, orig):
-        ft = self.simplify()
-    
-        igrad = ft.getImage()
-        grad = mmneg(igrad)
-        ws = mmcwatershed(grad, ft.getRegMax(), mmsecross(), 'REGIONS')
-    
-        preorder = [ft]
-        postorder = []
-    
-        regdict = {}
-    
-        while preorder:
-            node = preorder.pop()
-            preorder += node.children
-            postorder.append(node)
-    
-        while postorder:
-            node = postorder.pop()
-            if node.children:
-                attList = []
-                for child in node.children:
-                    attList += regdict[child.getKey()]
-                    del regdict[child.getKey()]
-            else:
-                mask = Points(np.uint16, ws[node.mask()][0] == ws)
-                attList = [ImageFunction(orig[..., mask.getX(), mask.getY()])]
-            regdict[node.getKey()] = attList
-            node.att = np.mean(attList)
-            
-        return ft    
-
     def getPoints(self, function):
         toprocess = [self]
 
@@ -341,8 +309,8 @@ class MaxTree(object):
         ft = self.simplify()
     
         igrad = ft.getImage()
-        grad = mmneg(igrad)
-        ws = mmcwatershed(grad, ft.getRegMax(), mmsecross(), 'REGIONS')
+        grad = ianeg(igrad)
+        ws = iacwatershed(grad, ft.getRegMax(), iasecross(), 'REGIONS')
         
         toprocess = [ft]
         

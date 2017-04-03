@@ -6,17 +6,24 @@ class ImageAdapter(object):
     def adapt(self, f):
         raise NotImplementedError("Every ImageAdapter must implement the adapt method.")
 
-class GrayImageAdapter(ImageAdapter):
-    def adapt(self, f):
-        return f,
-
 class CoordinatesImageAdapter(ImageAdapter):
     def adapt(self, f):
-        return f[0], f[1]
+        return f[-2], f[-1]
+
+class GrayImageAdapter(ImageAdapter):
+    def adapt(self, f):
+        if (len(f.shape) > 1):
+            return f[0].astype(np.uint8),
+        else:
+            return f,
+
+class GrayCoordinatesImageAdapter(ImageAdapter):
+    def adapft(self, f):
+        return f[0].astype(np.uint8), f[1], f[2]
 
 class ColorImageAdapter(ImageAdapter):
     def adapt(self, f):
-        return f,
+        return f[:3].astype(np.uint8),
 
 class ColorCoordinatesImageAdapter(ImageAdapter):
     def adapt(self, f):
