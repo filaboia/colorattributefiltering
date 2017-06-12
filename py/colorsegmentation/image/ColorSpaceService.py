@@ -147,3 +147,31 @@ def convertluvtorgb(f):
     
     h = convertxyztorgb(g)
     return np.clip(np.round(h), 0, max_dtype).astype(f.dtype)
+
+def convertRGBtoHSV(f):
+    g = np.empty(f.shape, dtype=np.float)
+    
+    R = f[0].astype(np.float) / 255
+    G = f[1].astype(np.float) / 255
+    B = f[2].astype(np.float) / 255
+    M = np.max(f.astype(np.float) / 255, axis=0)
+    m = np.min(f.astype(np.float) / 255, axis=0)
+    C = M - m
+    
+    g[0][C == 0] = 0
+    mask = (M == R) == (C != 0); g[0][mask] = ((G[mask] - B[mask]) / C[mask]) % 6
+    mask = (M == G) == (C != 0); g[0][mask] = (B[mask] - R[mask]) / C[mask] + 2
+    mask = (M == B) == (C != 0); g[0][mask] = (R[mask] - G[mask]) / C[mask] + 4
+    g[0] = (60 * g[0])
+    mask = g[0] < 0; g[0][mask] = g[0][mask] + 360
+    
+    mask = M != 0; g[1][mask] = C[mask] / M[mask]
+    g[1][M == 0] = 0
+    
+    g[2] = M
+    
+    g[0] = g[0]
+    g[1] = g[1] * 65535
+    g[2] = g[2] * 65535
+    
+    return np.clip(np.round(g), 0, 65535).astype(np.uint16)

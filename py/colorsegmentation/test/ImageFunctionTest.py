@@ -18,7 +18,7 @@ class ImageFunctionTest(unittest.TestCase):
         self.assertAlmostEqual(AverageColorError(colorform(self.f)), 2462.29, delta=0.01)
     
     def testColorHarmony(self):
-        self.assertAlmostEqual(ColorHarmony(fxyform(self.f)), -0.52, delta=0.01)
+        self.assertAlmostEqual(ColorHarmony(fxyform(self.f)), 0.52, delta=0.01)
 
 suite = unittest.TestLoader().loadTestsFromTestCase(ImageFunctionTest)
 unittest.TextTestRunner(verbosity=2).run(suite)

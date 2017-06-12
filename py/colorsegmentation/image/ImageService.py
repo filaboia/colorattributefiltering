@@ -4,6 +4,54 @@ import numpy as np
 import numpy.ma as ma
 import pandas as pd
 from ia870 import *
+import Image
+import mamba
+
+def safeCastUint(f):
+    if np.can_cast(f, np.uint8):
+        return f.astype(np.uint8)
+    if np.can_cast(f, np.uint16):
+        return f.astype(np.uint16)
+    if np.can_cast(f, np.uint32):
+        return f.astype(np.uint32)
+    return f.astype(np.uint64, casting='safe')
+
+def convertNumpy2Mamba(npIm):
+    if np.size(npIm.shape) == 1:
+        npIm = npIm[np.newaxis]
+    if npIm.dtype == np.bool:
+        npIm = npIm.astype(np.uint8) * 255
+    height, width = npIm.shape[-2:]
+    mbIm = mamba.imageMb(width, height, npIm.dtype.itemsize * 8)
+    plIm = Image.fromarray(npIm)
+    mamba.PIL2Mamba(plIm, mbIm)
+    return mbIm
+
+def convertMamba2Numpy(mbIm):
+    plIm = mamba.Mamba2PIL(mbIm)
+    return np.array(plIm)
+
+def label(npImIn):
+    mbImIn = convertNumpy2Mamba(npImIn)
+    mbImOut = mamba.imageMb(mbImIn, 32)
+    mamba.label(mbImIn, mbImOut, grid=mamba.SQUARE)
+    height, width = npImIn.shape[-2:]
+    return convertMamba2Numpy(mbImOut)[:height,:width].astype(np.uint32)
+
+def reconstruction(npIm, npMask):
+    mbIm = convertNumpy2Mamba(npIm)
+    mbMask = convertNumpy2Mamba(npMask)
+    mamba.build(mbMask, mbIm, mamba.SQUARE)
+    height, width = npIm.shape[-2:]
+    return convertMamba2Numpy(mbIm)[:height,:width].astype(npIm.dtype)
+
+# def geodesicDilate(npImIn, npMask):
+#     mbImIn = convertNumpy2Mamba(npImIn)
+#     mbMaskIn = convertNumpy2Mamba(npMask)
+#     mbImOut = mamba.imageMb(mbImIn)
+#     mamba.geodesicDilate(mbImIn, mbMaskIn, mbImOut, se=mamba.SQUARE3X3)
+#     height, width = npImIn.shape[-2:]
+#     return convertMamba2Numpy(mbImOut)[:height,:width].astype(npImIn.dtype)
 
 def harmony(p1, p2):
     def atualiza_range(p):
@@ -50,7 +98,13 @@ def harmony(p1, p2):
     
     HH = hsy(p1) + hsy(p2)
     
-    return ma.masked_invalid(HC + HL + HH)
+    return ma.masked_invalid(-1*(HC + HL + HH))
+    
+def harmonyPositive(p1, p2):
+    return harmony(p1, p2).clip(min=0)
+    
+def harmonyNegative(p1, p2):
+    return (-1*harmony(p1, p2)).clip(min=0)
             
 def euclid(f, fd):
     return pow(np.sum(pow(f - fd, 2), axis=0),0.5)
@@ -94,14 +148,7 @@ def gradient(f, gradientType=1, distanceType='euclid', includeOrigin=False, norm
         distances += [distance(desloca(f, 0, 1), desloca(f, 0, -1)), distance(desloca(f, 0, 1), desloca(f, 1, 0)), distance(desloca(f, 0, 1), desloca(f, -1, 0))]
         distances += [distance(desloca(f, 0, -1), desloca(f, 1, 0)), distance(desloca(f, 0, -1), desloca(f, -1, 0))]
         distances += [distance(desloca(f, 1, 0), desloca(f, -1, 0))]
-        g = ma.max(distances, axis=0) 
-    elif gradientType == 4:
-        g = ma.min(distances, axis=0) 
-    elif gradientType == 5:
-        distances += [distance(desloca(f, 0, 1), desloca(f, 0, -1)), distance(desloca(f, 0, 1), desloca(f, 1, 0)), distance(desloca(f, 0, 1), desloca(f, -1, 0))]
-        distances += [distance(desloca(f, 0, -1), desloca(f, 1, 0)), distance(desloca(f, 0, -1), desloca(f, -1, 0))]
-        distances += [distance(desloca(f, 1, 0), desloca(f, -1, 0))]
-        g = ma.min(distances, axis=0) 
+        g = ma.max(distances, axis=0)
     else:
         raise ValueError
     
@@ -200,7 +247,7 @@ def ordena_minimos(mins, inversa=False):
     if inversa:
         args = args[::-1]
     o_mins = np.argsort(args).reshape(mins.shape) + 1
-    reg_mins = grain(ialabel(~mins.mask), o_mins, 'min')
+    reg_mins = grain(label(~mins.mask), o_mins, 'min')
     count = np.bincount(np.unique(reg_mins))
     count[0] = 0
     return np.cumsum(count)[reg_mins]

@@ -3,6 +3,7 @@ from __future__ import division
 from colorsegmentation.image.ImageService import *
 from colorsegmentation.image.ImageValidator import *
 from colorsegmentation.image.ImageAdapter import *
+from colorsegmentation.image.StatisticsService import *
 import numpy as np
 import numpy.ma as ma
 
@@ -10,14 +11,14 @@ class ImageFunction(object):
     def __new__(cls, f):
         f = np.array(f)
         cls.validate(f)
-        return cls.compute(*cls.adapt(f))
+        return cls.compute(cls, *cls.adapt(f))
     
     @staticmethod
     def validate(f):
         raise NotImplementedError("Every ImageFunction must implement the validate static method.")
     
     @staticmethod
-    def compute(f):
+    def compute(cls, f):
         raise NotImplementedError("Every ImageFunction must implement the compute static method.")
     
     @staticmethod
@@ -35,7 +36,7 @@ class GrayFunction(ImageFunction):
 
 class Entropy(GrayFunction):
     @staticmethod
-    def compute(f):
+    def compute(cls, f):
         count = np.bincount(normaliza(f+1))[1:]
         p = count/np.sum(count)
         log = np.log2(p);
@@ -43,17 +44,17 @@ class Entropy(GrayFunction):
 
 class Area(GrayFunction):
     @staticmethod
-    def compute(f):
+    def compute(cls, f):
         return np.sum(f >= 0)
 
 class Height(GrayFunction):
     @staticmethod
-    def compute(f):
+    def compute(cls, f):
         return np.max(f) - np.min(f)
 
 class Volume(GrayFunction):
     @staticmethod
-    def compute(f):
+    def compute(cls, f):
         return np.sum(f - np.min(f) + 1)
 
 class CoordinatesFunction(ImageFunction):
@@ -76,8 +77,18 @@ class ColorFunction(ImageFunction):
 
 class AverageColorError(ColorFunction):
     @staticmethod
-    def compute(f):
+    def compute(cls, f):
         return np.sum(pow(np.sum(pow(f - np.mean(f, axis=1,  keepdims=True), 2), axis=0), 0.5))
+
+class HistogramDivergenceFunction(ColorFunction):
+    @staticmethod
+    def compute(cls, f):
+        h = weightedHueHistogram(f)
+        return kullbackLieblerDivergence(h, cls.baseHistogram())
+        
+    @staticmethod
+    def baseHistogram():
+        raise NotImplementedError("Every HistogramDivergenceFunction must implement the adapt static method.")
 
 class ColorCoordinatesFunction(ImageFunction):
     @staticmethod    
@@ -90,10 +101,10 @@ class ColorCoordinatesFunction(ImageFunction):
 
 class ColorHarmony(ColorCoordinatesFunction):
     @staticmethod
-    def compute(f, x, y):
+    def compute(cls, f, x, y):
         g = ma.empty((3, x.max() - x.min() + 1, y.max() - y.min() + 1), dtype=f.dtype)
         g.mask = True
         
         g[:, x - x.min(), y - y.min()] = f[:]
         
-        return float(ma.mean(gradient(g, gradientType=5, distanceType='harmony', includeOrigin=True, normalize=False)))
+        return float(ma.mean(gradient(g, gradientType=3, distanceType='harmony', includeOrigin=True, normalize=False)))

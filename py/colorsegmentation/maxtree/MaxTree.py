@@ -44,15 +44,12 @@ class MaxTree(object):
             node.mask.setX(node.mask.getX() + offset[0])
             node.mask.setY(node.mask.getY() + offset[1])
 
-            label = ialabel(region)
+            lb = label(region)
 
-            if len(label.shape) == 1:
-                label = label[np.newaxis]
-
-            for i in range(1, label.max() + 1):
+            for i in range(1, lb.max() + 1):
                 child = MaxTree()
                 node.children.append(child)
-                child.mask = Points(np.uint16, label == i)
+                child.mask = Points(np.uint16, lb == i)
                 child.mask.setX(child.mask.getX() + offset[0])
                 child.mask.setY(child.mask.getY() + offset[1])
                 toprocess.append(child)
@@ -243,7 +240,7 @@ class MaxTree(object):
 
         return region
 
-    def open(self, value):
+    def open(self, value, inclusive=True):
         ft = cp.deepcopy(self)
 
         toprocess = [ft]
@@ -252,7 +249,7 @@ class MaxTree(object):
             node = toprocess.pop()
             newchildren = []
             for child in node.children:
-                if child.att >= value:
+                if child.att > value or inclusive and child.att == value:
                     newchildren.append(child)
                     toprocess.append(child)
                 else:
