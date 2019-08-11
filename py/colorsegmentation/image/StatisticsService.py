@@ -7,7 +7,7 @@ def weightedHueHistogram(f):
     SV = f[1].astype(np.float) * f[2].astype(np.float)
     
     if np.sum(SV) == 0:
-        return np.zeros(360, np.uint)
+        return np.zeros(360, np.uint8)
     
     return np.sum(np.sum((np.tile(H, (360, 1, 1)) == np.arange(360)[:, np.newaxis, np.newaxis]) * SV[np.newaxis], axis=2), axis=1) / np.sum(SV)
 

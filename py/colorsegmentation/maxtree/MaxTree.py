@@ -40,7 +40,7 @@ class MaxTree(object):
             oldregion = np.zeros((indices[0].max() + 1, indices[1].max() + 1), dtype = np.bool)
             oldregion[indices] = f[node.mask()] >= node.level
 
-            node.mask = Points(np.uint16, oldregion - region)
+            node.mask = Points(np.uint16, oldregion ^ region)
             node.mask.setX(node.mask.getX() + offset[0])
             node.mask.setY(node.mask.getY() + offset[1])
 

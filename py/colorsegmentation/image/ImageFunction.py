@@ -39,7 +39,7 @@ class Entropy(GrayFunction):
     def compute(cls, f):
         count = np.bincount(normaliza(f+1))[1:]
         p = count/np.sum(count)
-        log = np.log2(p);
+        log = np.log2(p)
         return abs(np.sum(p*log))
 
 class Area(GrayFunction):

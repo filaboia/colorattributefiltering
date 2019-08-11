@@ -4,7 +4,7 @@ import numpy as np
 import numpy.ma as ma
 import pandas as pd
 from ia870 import *
-import Image
+from PIL import Image
 import mamba
 
 def safeCastUint(f):
